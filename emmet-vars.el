@@ -1,3 +1,5 @@
+(declare-function emmet-defparameter "emmet-mode.el")
+
 ;; conf/snippets.el
 ;; This file is generated from conf/snippets.json
 ;; Don't edit.

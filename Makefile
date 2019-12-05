@@ -11,6 +11,8 @@ emmet-vars.elc: emmet-vars.el
 emmet-vars.el: conf/snippets.el conf/preferences.el
 	rm -f $(DST)
 	touch $(DST)
+	echo '(declare-function emmet-defparameter "emmet-mode.el")' >> $(DST)
+	echo "" >> $(DST)
 	cat conf/snippets.el >> $(DST)
 	cat conf/preferences.el >> $(DST)
 	echo "" >> $(DST)

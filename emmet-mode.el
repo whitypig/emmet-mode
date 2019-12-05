@@ -69,7 +69,7 @@
 
 (defconst emmet-mode:version "1.0.10")
 
-
+(require 'emmet-vars)
 (require 'thingatpt)
 (require 'cl-lib)
 
