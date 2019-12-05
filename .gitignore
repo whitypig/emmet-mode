@@ -1,3 +1,4 @@
 memo*
 *.elc
 *~
+init.test.el
