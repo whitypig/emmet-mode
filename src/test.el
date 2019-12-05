@@ -6,16 +6,16 @@
 (emmet-defparameter *emmet-test-cases* nil)
 
 (defun emmet-run-test-case (name fn cases)
-  (let ((res (loop for c in cases
-                    for i to (1- (length cases)) do
-                    (let ((expected (cdr c))
-                          (actual (funcall fn (car c))))
-                      (when (not (equal expected actual))
-                        (princ
-                         (concat "*** [FAIL] | \"" name "\" " (number-to-string i) "\n\n"
-                                 (format "%s" (car c)) "\t=>\n\n"
-                                 "Expected\n" (format "%s" expected) "\n\nActual\n" (format "%s" actual) "\n\n"))
-                        (return 'fail))))))
+  (let ((res (cl-loop for c in cases
+                      for i to (1- (length cases)) do
+                      (let ((expected (cdr c))
+                            (actual (funcall fn (car c))))
+                        (when (not (equal expected actual))
+                          (princ
+                           (concat "*** [FAIL] | \"" name "\" " (number-to-string i) "\n\n"
+                                   (format "%s" (car c)) "\t=>\n\n"
+                                   "Expected\n" (format "%s" expected) "\n\nActual\n" (format "%s" actual) "\n\n"))
+                          (return 'fail))))))
     (if (not (eql res 'fail))
         (princ (concat "    [PASS] | \"" name "\" "
                        (number-to-string (length cases)) " tests.\n")))))
@@ -32,19 +32,19 @@
                  (setq *emmet-test-cases*
                        (cons (cons name (cons fn defs)) *emmet-test-cases*))))))
           (t
-           (loop for test in (reverse *emmet-test-cases*) do
-                 (let ((name  (symbol-name (car test)))
-                       (fn    (cadr test))
-                       (cases (cddr test)))
-                   (emmet-run-test-case name fn cases)))))))
+           (cl-loop for test in (reverse *emmet-test-cases*) do
+                    (let ((name  (symbol-name (car test)))
+                          (fn    (cadr test))
+                          (cases (cddr test)))
+                      (emmet-run-test-case name fn cases)))))))
 
 (defmacro define-emmet-transform-test-case (name fn &rest tests)
   `(emmet-test-cases 'assign ',name
-                         ,fn
-                         ',(loop for x on tests by #'cddr collect
-                                 (cons (car x)
-                                       (emmet-join-string (cadr x)
-                                                              "\n")))))
+                     ,fn
+                     ',(cl-loop for x on tests by #'cddr collect
+                                (cons (car x)
+                                      (emmet-join-string (cadr x)
+                                                         "\n")))))
 
 (defmacro define-emmet-transform-html-test-case (name &rest tests)
   `(define-emmet-transform-test-case ,name
@@ -53,9 +53,9 @@
 
 (defmacro define-emmet-unit-test-case (name fn &rest tests)
   `(emmet-test-cases 'assign ',name
-                         ,fn
-                         ',(loop for x on tests by #'cddr collect
-                                 (cons (car x) (cadr x)))))
+                     ,fn
+                     ',(cl-loop for x on tests by #'cddr collect
+                                (cons (car x) (cadr x)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; XML-abbrev tests
@@ -119,8 +119,8 @@
                             "    <li></li>"
                             "</ol>")
   "ul#q.x.y[m=l]+"          ("<ul id=\"q\" class=\"x y\" m=\"l\">"
-                            "    <li></li>"
-                            "</ul>"))
+                             "    <li></li>"
+                             "</ul>"))
 
 (define-emmet-transform-html-test-case Parent-child
   "a>b"                    ("<a href=\"\"><b></b></a>")
@@ -292,15 +292,15 @@
   "a#foo.bar.mu[x=y m=l]"   ("<a id=\"foo\" class=\"bar mu\" href=\"\" x=\"y\" m=\"l\"></a>")
   "a/#foo.bar.mu[x=y m=l]"  ("<a id=\"foo\" class=\"bar mu\" href=\"\" x=\"y\" m=\"l\"/>")
   "a[x=y]+b"                ("<a href=\"\" x=\"y\"></a>"
-                            "<b></b>")
+                             "<b></b>")
   "a[x=y]+b[x=y]"            ("<a href=\"\" x=\"y\"></a>"
-                            "<b x=\"y\"></b>")
+                              "<b x=\"y\"></b>")
   "a[x=y]>b"                ("<a href=\"\" x=\"y\"><b></b></a>")
   "a[x=y]>b[x=y]"            ("<a href=\"\" x=\"y\"><b x=\"y\"></b></a>")
   "a[x=y]>b[x=y]+c[x=y]"      ("<a href=\"\" x=\"y\">"
-                            "    <b x=\"y\"></b>"
-                            "    <c x=\"y\"></c>"
-                            "</a>"))
+                               "    <b x=\"y\"></b>"
+                               "    <c x=\"y\"></c>"
+                               "</a>"))
 
 (define-emmet-transform-html-test-case Parentheses
   "(a)"                    ("<a href=\"\"></a>")
@@ -428,8 +428,8 @@
   "a#q.x[x=y m=l]|hic"      ("[:a#q.x {:x \"y\", :m \"l\"}]")
   ".footer|hic"            ("[:div.footer]")
   "p>a[href=#]+br|hic"      ("[:p"
-                            "    [:a {:href \"#\"}]"
-                            "    [:br]]")
+                             "    [:a {:href \"#\"}]"
+                             "    [:br]]")
 
   "#q>(a*2>b{x})+p>{m}+b|hic"
   ("[:div#q"
@@ -548,9 +548,9 @@
   "fs"                     ("font-style: italic;")
   "xxxxxx 0 auto 0e auto!" ("xxxxxx: 0px auto 0em auto !important;")
   "p auto+m auto+bg+#F00 x.jpg 10 10 repeat-x"
-                           ("padding: auto;"
-                            "margin: auto;"
-                            "background: #F00 url(x.jpg) 10px 10px repeat-x;")
+  ("padding: auto;"
+   "margin: auto;"
+   "background: #F00 url(x.jpg) 10px 10px repeat-x;")
   "-bdrs"                  ("-webkit-border-radius: ;"
                             "-moz-border-radius: ;"
                             "border-radius: ;")
@@ -566,7 +566,7 @@
                             "	1px"
                             "}")
   "@i http://github.com/smihica/index.css"
-                           ("@import url(http://github.com/smihica/index.css);")
+  ("@import url(http://github.com/smihica/index.css);")
   )
 
 ;; lorem generator test
@@ -595,8 +595,8 @@
       (buffer-string))))
 
 (emmet-run-test-case "Inline Expansion"
-  #'emmet-inline-expansion-test
-  '((("span#test") . "<div><span id=\"test\"></span></div>")))
+                     #'emmet-inline-expansion-test
+                     '((("span#test") . "<div><span id=\"test\"></span></div>")))
 
 ;; indent
 ;; NOTE: Indent uses indent-region by default,
@@ -617,14 +617,14 @@
 
 (let ((emmet-indent-after-insert t))
   (emmet-run-test-case "Indentation via indent-region"
-    #'emmet-indent-test
-    '((("div>ul>li*3") . "<div>\n  <ul>\n    <li></li>\n    <li></li>\n    <li></li>\n  </ul>\n</div>"))))
+                       #'emmet-indent-test
+                       '((("div>ul>li*3") . "<div>\n  <ul>\n    <li></li>\n    <li></li>\n    <li></li>\n  </ul>\n</div>"))))
 
 (let ((emmet-indent-after-insert nil)
       (emmet-indentation 2))
   (emmet-run-test-case "Indentation via emmet-indentation"
-    #'emmet-indent-test
-    '((("div>ul>li*3") . "<div>\n  <ul>\n    <li></li>\n    <li></li>\n    <li></li>\n  </ul>\n</div>"))))
+                       #'emmet-indent-test
+                       '((("div>ul>li*3") . "<div>\n  <ul>\n    <li></li>\n    <li></li>\n    <li></li>\n  </ul>\n</div>"))))
 
 ;; Old tests for previous indent behavior last seen:
 ;;   commit: f56174e5905a40583b47f9737abee3af8da3faeb
@@ -644,16 +644,16 @@
       (buffer-string))))
 
 (emmet-run-test-case "Wrap with markup on text with brackets and markup"
-  #'emmet-wrap-with-markup-test
-  '((("div>ul>li") . "<div>\n  <ul>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n  </ul>\n</div>")))
+                     #'emmet-wrap-with-markup-test
+                     '((("div>ul>li") . "<div>\n  <ul>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n  </ul>\n</div>")))
 
 (emmet-run-test-case "Wrap with markup multiplier"
-  #'emmet-wrap-with-markup-test
-  '((("div>ul>li*3") . "<div>\n  <ul>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n  </ul>\n</div>")))
+                     #'emmet-wrap-with-markup-test
+                     '((("div>ul>li*3") . "<div>\n  <ul>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n    <li>This is gnarly text with $$$s and <span>markup</span> and end brackets}}s</li>\n  </ul>\n</div>")))
 
 (emmet-run-test-case "Wrap with multiline content"
-  #'emmet-wrap-with-markup-test
-  '((("div>ul>li" "I am some\nmultiline\n  text") . "<div>\n  <ul>\n    <li>I am some\n      multiline\n      text</li>\n  </ul>\n</div>")))
+                     #'emmet-wrap-with-markup-test
+                     '((("div>ul>li" "I am some\nmultiline\n  text") . "<div>\n  <ul>\n    <li>I am some\n      multiline\n      text</li>\n  </ul>\n</div>")))
 
 (emmet-run-test-case "Wrap with per-line markup (trailing *)"
                      #'emmet-wrap-with-markup-test
@@ -675,12 +675,12 @@
       (buffer-string))))
 
 (emmet-run-test-case "Regression 54 with span"
-  #'emmet-regression-54-test
-  '((("span") . "<div class=\"broken\"><span></span>")))
+                     #'emmet-regression-54-test
+                     '((("span") . "<div class=\"broken\"><span></span>")))
 
 (emmet-run-test-case "Regression 54 with complex span"
-  #'emmet-regression-54-test
-  '((("span.whut[thing=\"stuff\"]{Huh?}") . "<div class=\"broken\"><span class=\"whut\" thing=\"stuff\">Huh?</span>")))
+                     #'emmet-regression-54-test
+                     '((("span.whut[thing=\"stuff\"]{Huh?}") . "<div class=\"broken\"><span class=\"whut\" thing=\"stuff\">Huh?</span>")))
 
 (define-emmet-transform-html-test-case regression-61-bracket-escapes
   "div{\\}\\}\\}}" ("<div>}}}</div>"))
@@ -699,12 +699,12 @@
       (buffer-string))))
 
 (emmet-run-test-case "JSX's className 1"
-  #'emmet-expand-jsx-className?-test
-  '(((".jsx") . "<div className=\"jsx\"></div>")))
+                     #'emmet-expand-jsx-className?-test
+                     '(((".jsx") . "<div className=\"jsx\"></div>")))
 
 (emmet-run-test-case "JSX's className 2"
-  #'emmet-expand-jsx-className?-test
-  '(((".jsx>ul.lis>li.itm{x}*2") . "<div className=\"jsx\">\n  <ul className=\"lis\">\n    <li className=\"itm\">x</li>\n    <li className=\"itm\">x</li>\n  </ul>\n</div>")))
+                     #'emmet-expand-jsx-className?-test
+                     '(((".jsx>ul.lis>li.itm{x}*2") . "<div className=\"jsx\">\n  <ul className=\"lis\">\n    <li className=\"itm\">x</li>\n    <li className=\"itm\">x</li>\n  </ul>\n</div>")))
 
 (defun emmet-self-closing-tag-style-test (lis)
   (let ((es (car lis))
@@ -717,23 +717,23 @@
 
 ;; By default, `emmet-self-closing-tag-style' must not break any test code.
 (emmet-run-test-case "Self closing tag style 1"
-  #'emmet-self-closing-tag-style-test
-  '((("meta") . "<meta/>")))
+                     #'emmet-self-closing-tag-style-test
+                     '((("meta") . "<meta/>")))
 
 (let ((emmet-self-closing-tag-style "/"))
   (emmet-run-test-case "Self closing tag style 2"
-    #'emmet-self-closing-tag-style-test
-    '((("meta") . "<meta/>"))))
+                       #'emmet-self-closing-tag-style-test
+                       '((("meta") . "<meta/>"))))
 
 (let ((emmet-self-closing-tag-style " /"))
   (emmet-run-test-case "Self closing tag style 3"
-    #'emmet-self-closing-tag-style-test
-    '((("meta") . "<meta />"))))
+                       #'emmet-self-closing-tag-style-test
+                       '((("meta") . "<meta />"))))
 
 (let ((emmet-self-closing-tag-style ""))
   (emmet-run-test-case "Self closing tag style 4"
-    #'emmet-self-closing-tag-style-test
-    '((("meta") . "<meta>"))))
+                       #'emmet-self-closing-tag-style-test
+                       '((("meta") . "<meta>"))))
 
 ;; start
 (emmet-test-cases)

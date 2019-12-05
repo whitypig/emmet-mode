@@ -4,8 +4,10 @@
 
 (defconst emmet-mode:version "1.0.10")
 
-(with-no-warnings
-  (require 'cl))
+(require 'thingatpt)
+(require 'cl-lib)
+
+(declare-function lexical-let "cl.el")
 
 ;; for portability with < 24.3 EMACS
 (unless (fboundp 'cl-labels) (fset 'cl-labels 'labels))
