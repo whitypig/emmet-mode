@@ -1,5 +1,8 @@
-(declare-function emmet-defparameter "emmet-mode.el")
-
+(eval-when-compile
+  (defmacro emmet-defparameter (symbol &optional initvalue docstring)
+    `(progn
+       (defvar ,symbol nil ,docstring)
+       (setq   ,symbol ,initvalue))))
 ;; conf/snippets.el
 ;; This file is generated from conf/snippets.json
 ;; Don't edit.

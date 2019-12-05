@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test-cases
 
+(load-file (concat (file-name-directory load-file-name) "../emmet-vars.el"))
 (load-file (concat (file-name-directory load-file-name) "../emmet-mode.el"))
 
 (emmet-defparameter *emmet-test-cases* nil)

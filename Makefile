@@ -2,8 +2,8 @@ DST=emmet-vars.el
 
 all:	emmet-mode.elc emmet-vars.elc
 
-emmet-mode.elc:
-	/usr/bin/env emacs --batch --eval '(byte-compile-file "emmet-mode.el")'
+emmet-mode.elc: emmet-mode.el emmet-vars.elc
+	/usr/bin/env emacs --batch --eval '(progn (load-file "./emmet-vars.elc") (byte-compile-file "$<"))'
 
 emmet-vars.elc: emmet-vars.el
 	/usr/bin/env emacs --batch --eval '(byte-compile-file "emmet-vars.el")'
@@ -11,8 +11,11 @@ emmet-vars.elc: emmet-vars.el
 emmet-vars.el: conf/snippets.el conf/preferences.el
 	rm -f $(DST)
 	touch $(DST)
-	echo '(declare-function emmet-defparameter "emmet-mode.el")' >> $(DST)
-	echo "" >> $(DST)
+	echo "(eval-when-compile" >> $(DST)
+	echo "  (defmacro emmet-defparameter (symbol &optional initvalue docstring)" >> $(DST)
+	echo "    \`(progn" >> $(DST)
+	echo "       (defvar ,symbol nil ,docstring)" >> $(DST)
+	echo "       (setq   ,symbol ,initvalue))))" >> $(DST)
 	cat conf/snippets.el >> $(DST)
 	cat conf/preferences.el >> $(DST)
 	echo "" >> $(DST)
