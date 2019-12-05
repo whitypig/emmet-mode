@@ -1,35 +1,33 @@
-DST=emmet-mode.el
+DST=emmet-vars.el
 
-all:	emmet-mode.el emmet-mode.elc
+all:	emmet-mode.elc emmet-vars.elc
 
-emmet-mode.el: src/snippets.el src/preferences.el src/*
-	rm -f $(DST)
-	touch $(DST)
-	cat src/comments.el >> $(DST)
-	cat src/init.el >> $(DST)
-	cat src/mode-def.el >> $(DST)
-	cat src/snippets.el >> $(DST)
-	cat src/preferences.el >> $(DST)
-	cat src/html-abbrev.el >> $(DST)
-	cat src/lorem.el >> $(DST)
-	cat src/css-abbrev.el >> $(DST)
-	echo "" >> $(DST)
-	echo ";;; emmet-mode.el ends here" >> $(DST)
-
-emmet-mode.elc: emmet-mode.el
+emmet-mode.elc:
 	/usr/bin/env emacs --batch --eval '(byte-compile-file "emmet-mode.el")'
 
-src/snippets.el: conf/snippets.json
-	tools/json2hash conf/snippets.json -o src/snippets.el --defvar 'emmet-snippets'
+emmet-vars.elc: emmet-vars.el
+	/usr/bin/env emacs --batch --eval '(byte-compile-file "emmet-vars.el")'
 
-src/preferences.el: conf/preferences.json
-	tools/json2hash conf/preferences.json -o src/preferences.el --defvar 'emmet-preferences'
+emmet-vars.el: conf/snippets.el conf/preferences.el
+	rm -f $(DST)
+	touch $(DST)
+	cat conf/snippets.el >> $(DST)
+	cat conf/preferences.el >> $(DST)
+	echo "" >> $(DST)
+	echo "(provide 'emmet-vars)" >> $(DST)
+	echo ";;; emmet-vars.el ends here" >> $(DST)
+
+conf/snippets.el: conf/snippets.json
+	tools/json2hash conf/snippets.json -o conf/snippets.el --defvar 'emmet-snippets'
+
+conf/preferences.el: conf/preferences.json
+	tools/json2hash conf/preferences.json -o conf/preferences.el --defvar 'emmet-preferences'
 
 clean:
-	rm -f emmet-mode.elc emmet-mode.el src/snippets.el src/preferences.el
+	rm -f emmet-mode.elc emmet-vars.elc emmet-vars.el conf/snippets.el conf/preferences.el
 
 test:
-	/usr/bin/env emacs --quick --script src/test.el
+	/usr/bin/env emacs --quick --script test/test.el
 
 docs:
 	echo docs

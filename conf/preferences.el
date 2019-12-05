@@ -1,4 +1,4 @@
-;; src/preferences.el
+;; conf/preferences.el
 ;; This file is generated from conf/preferences.json
 ;; Don't edit.
 (emmet-defparameter emmet-preferences
